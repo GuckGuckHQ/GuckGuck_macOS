@@ -61,37 +61,23 @@ public class ScreenshotTimerService : IDisposable
 		UpdateCurrentId(id);
 
 		var screenshot = await CaptureScreenRegion(InputRect);
+
+
 		if (screenshot is not null)
 		{
-			var dataProvider = screenshot.DataProvider;
-			if (dataProvider != null)
-			{
-				var data = dataProvider.CopyData();
-				if (data != null)
-				{
-					var byteArray = new byte[data.Length];
-					Marshal.Copy(data.Bytes, byteArray, 0, (int)data.Length);
+			var bitmapRep = new NSBitmapImageRep(screenshot);
 
-					var byteDataProvider = new CGDataProvider(byteArray, 0, byteArray.Length);
-					var cgImage =
-						CGImage.FromPNG(byteDataProvider, null, true, CGColorRenderingIntent.Default);
+			var jpegData = bitmapRep.RepresentationUsingTypeProperties(NSBitmapImageFileType.Jpeg, new NSDictionary());
+			var byteArray = new byte[jpegData.Length];
+			Marshal.Copy(jpegData.Bytes, byteArray, 0, (int)jpegData.Length);
 
-					//upload to https://runasp.net
+			// var desktopPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "screenshot.jpg");
+			// File.WriteAllBytes(desktopPath, byteArray);
 
-
-
-					//save screenshot to file
-					//using (var fs = File.OpenWrite(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), id + DateTime.Now.ToString("yyyyMMddHHmmss") + ".png")))
-					//{
-					//	fs.Write(bytes, 0, bytes.Length);
-					//}
-
-					var content = new MultipartFormDataContent();
-					content.Add(new ByteArrayContent(byteArray), "Image", "screenshot.png");
-					content.Add(new StringContent(_currentId), "Id");
-					var response = await _client.PostAsync($"{Constants.BaseUrl}/image", content);
-				}
-			}
+			var content = new MultipartFormDataContent();
+			content.Add(new ByteArrayContent(byteArray), "Image", "screenshot.jpg");
+			content.Add(new StringContent(_currentId), "Id");
+			var response = await _client.PostAsync($"{Constants.BaseUrl}/image", content);
 		}
 	}
 

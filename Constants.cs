@@ -10,7 +10,7 @@ public class Constants
 	public static string AppName = "GuckGuck";
 	public static string AppVersion = "0.0.1";
 #if DEBUG
-	public static string BaseUrl = "https://localhost:7179";
+	public static string BaseUrl = "http://localhost:5137";
 #else
 	public static string BaseUrl = "http://guckguck.runasp.net";
 #endif

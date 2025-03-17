@@ -5,7 +5,7 @@
 // Manual changes to this file may not be handled correctly.
 //
 
-namespace GuckGuck_macOS;
+namespace GuckGuck;
 
 [Register ("ViewController")]
 partial class ViewController {

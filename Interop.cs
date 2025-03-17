@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using ObjCRuntime;
 
-namespace GuckGuck_macOS;
+namespace GuckGuck;
 
 public static class Interop
 {

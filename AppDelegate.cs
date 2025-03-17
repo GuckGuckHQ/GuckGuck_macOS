@@ -1,4 +1,4 @@
-namespace GuckGuck_macOS;
+namespace GuckGuck;
 
 [Register ("AppDelegate")]
 public class AppDelegate : NSApplicationDelegate {

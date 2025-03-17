@@ -7,11 +7,14 @@ using MobileCoreServices;
 using ObjCRuntime;
 using ScreenCaptureKit;
 
-namespace GuckGuck_macOS;
+namespace GuckGuck;
 
 public partial class ViewController : NSViewController
 {
     private NSView _firstRow;
+    private int _spacing = 5;
+    private int _padding = 10;
+    private NSButton _startButton;
        public override void ViewWillAppear()
     {
         base.ViewWillAppear();
@@ -42,7 +45,7 @@ public override void ViewDidLoad()
     };
     secondRow.Layer.BackgroundColor = NSColor.FromRgb(30, 30, 30).CGColor; // Set background color to #1e1e1e
 
-    var startButton = new NSButton
+    _startButton = new NSButton
     {
         Title = "Start",
         TranslatesAutoresizingMaskIntoConstraints = false
@@ -90,7 +93,7 @@ public override void ViewDidLoad()
         Orientation = NSUserInterfaceLayoutOrientation.Horizontal,
         TranslatesAutoresizingMaskIntoConstraints = false,
         Distribution = NSStackViewDistribution.FillProportionally,
-        Spacing = 10
+        Spacing = _spacing
     };
 
     stackView.AddArrangedSubview(minusButton);
@@ -98,7 +101,7 @@ public override void ViewDidLoad()
     stackView.AddArrangedSubview(plusButton);
     stackView.AddArrangedSubview(minutesButton);
 
-    secondRow.AddSubview(startButton);
+    secondRow.AddSubview(_startButton);
     secondRow.AddSubview(stackView);
     secondRow.AddSubview(bottomTextBox);
     secondRow.AddSubview(smallButton);
@@ -122,42 +125,37 @@ public override void ViewDidLoad()
         secondRow.LeftAnchor.ConstraintEqualTo(View.LeftAnchor),
         secondRow.RightAnchor.ConstraintEqualTo(View.RightAnchor),
         secondRow.BottomAnchor.ConstraintEqualTo(View.BottomAnchor),
-        secondRow.HeightAnchor.ConstraintEqualTo(100)
+        secondRow.HeightAnchor.ConstraintEqualTo(60)
     });
 
     // Set up constraints for the buttons and textbox in the second row
     NSLayoutConstraint.ActivateConstraints(new[]
     {
-        startButton.LeftAnchor.ConstraintEqualTo(secondRow.LeftAnchor, 10),
-        startButton.CenterYAnchor.ConstraintEqualTo(secondRow.CenterYAnchor, -25),
-        startButton.RightAnchor.ConstraintEqualTo(stackView.LeftAnchor, -10),
+        _startButton.LeftAnchor.ConstraintEqualTo(secondRow.LeftAnchor, _spacing),
+        _startButton.CenterYAnchor.ConstraintEqualTo(secondRow.CenterYAnchor, -_padding),
+        _startButton.RightAnchor.ConstraintEqualTo(stackView.LeftAnchor, -_spacing),
 
-        stackView.RightAnchor.ConstraintEqualTo(secondRow.RightAnchor, -10),
-        stackView.CenterYAnchor.ConstraintEqualTo(secondRow.CenterYAnchor, -25),
+        stackView.RightAnchor.ConstraintEqualTo(secondRow.RightAnchor, -_spacing),
+        stackView.CenterYAnchor.ConstraintEqualTo(secondRow.CenterYAnchor, -_padding),
         stackView.WidthAnchor.ConstraintLessThanOrEqualTo(200), // Set maximum width for stackView
 
-        bottomTextBox.LeftAnchor.ConstraintEqualTo(secondRow.LeftAnchor, 10),
-        bottomTextBox.TopAnchor.ConstraintEqualTo(startButton.BottomAnchor, 10),
-        bottomTextBox.RightAnchor.ConstraintEqualTo(smallButton.LeftAnchor, -10),
+        bottomTextBox.LeftAnchor.ConstraintEqualTo(secondRow.LeftAnchor, _spacing),
+        bottomTextBox.TopAnchor.ConstraintEqualTo(_startButton.BottomAnchor, _spacing),
+        bottomTextBox.RightAnchor.ConstraintEqualTo(smallButton.LeftAnchor, -_spacing),
 
-        smallButton.RightAnchor.ConstraintEqualTo(secondRow.RightAnchor, -10),
+        smallButton.RightAnchor.ConstraintEqualTo(secondRow.RightAnchor, -_spacing),
         smallButton.CenterYAnchor.ConstraintEqualTo(bottomTextBox.CenterYAnchor)
     });
 
     // Add a minimum width constraint to the start button
-    var startButtonMinWidthConstraint = startButton.WidthAnchor.ConstraintGreaterThanOrEqualTo(50);
-    startButtonMinWidthConstraint.Priority = 999; // Set a high priority but lower than required constraints
-    startButtonMinWidthConstraint.Active = true;
+    var _startButtonMinWidthConstraint = _startButton.WidthAnchor.ConstraintGreaterThanOrEqualTo(50);
+    _startButtonMinWidthConstraint.Priority = 999; // Set a high priority but lower than required constraints
+    _startButtonMinWidthConstraint.Active = true;
 
-    startButton.Activated += StartButton_Activated;
+    _startButton.Activated += StartButton_Activated;
     minusButton.Activated += MinusButton_Activated;
     plusButton.Activated += PlusButton_Activated;
     smallButton.Activated += SmallButton_Activated;
-}
-
-private void StartButton_Activated(object sender, EventArgs e)
-{
-    // Handle Start button click
 }
 
 private void MinusButton_Activated(object sender, EventArgs e)

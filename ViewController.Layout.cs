@@ -8,7 +8,7 @@ public partial class ViewController : NSViewController
     private NSButton _startButton;
     private NSButton _minusButton;
     private NSButton _plusButton;
-    private NSTextField _textBox;
+    private NSTextField _intervalTextBox;
     private NSButton _unitButton;
     private NSTextField _urlTextBox;
     private NSButton _visitButton;
@@ -16,11 +16,21 @@ public partial class ViewController : NSViewController
     public override void ViewWillAppear()
     {
         base.ViewWillAppear();
+        View.Window.Delegate = new WindowDelegate(this);
 
         View.Window.BackgroundColor = NSColor.Clear;
         View.Window.IsOpaque = false;
         View.Window.HasShadow = false;
+
     }
+
+    public void OnWindowMoved()
+{
+    if (_screenshotService != null)
+    {
+        _screenshotService.InputRect = View.Window.ConvertRectToScreen(_firstRow.Frame);
+    }
+}
 
     public override void ViewDidLoad()
     {
@@ -61,7 +71,7 @@ public partial class ViewController : NSViewController
             TranslatesAutoresizingMaskIntoConstraints = false
         };
 
-        _textBox = new NSTextField
+        _intervalTextBox = new NSTextField
         {
             StringValue = "1",
             TranslatesAutoresizingMaskIntoConstraints = false
@@ -81,7 +91,7 @@ public partial class ViewController : NSViewController
 
         _visitButton = new NSButton
         {
-            Title = "Small",
+            Title = "Visit",
             TranslatesAutoresizingMaskIntoConstraints = false
         };
 
@@ -95,7 +105,7 @@ public partial class ViewController : NSViewController
         };
 
         stackView.AddArrangedSubview(_minusButton);
-        stackView.AddArrangedSubview(_textBox);
+        stackView.AddArrangedSubview(_intervalTextBox);
         stackView.AddArrangedSubview(_plusButton);
         stackView.AddArrangedSubview(_unitButton);
 
@@ -149,6 +159,12 @@ public partial class ViewController : NSViewController
         var _startButtonMinWidthConstraint = _startButton.WidthAnchor.ConstraintGreaterThanOrEqualTo(50);
         _startButtonMinWidthConstraint.Priority = 999; // Set a high priority but lower than required constraints
         _startButtonMinWidthConstraint.Active = true;
+
+        var _unitButtonWidthConstraint = _unitButton.WidthAnchor.ConstraintEqualTo(100);
+        _unitButtonWidthConstraint.Active = true;
+
+        var _intervalTextBoxWidthConstraint = _intervalTextBox.WidthAnchor.ConstraintEqualTo(32);
+        _intervalTextBoxWidthConstraint.Active = true;
 
         _startButton.Activated += StartButton_Activated;
         _minusButton.Activated += MinusButton_Activated;

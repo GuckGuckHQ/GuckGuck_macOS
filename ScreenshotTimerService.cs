@@ -55,31 +55,30 @@ public class ScreenshotTimerService : IDisposable
 		await CaptureAndUploadScreenshot(_currentId);
 	}
 
-	public async Task CaptureAndUploadScreenshot(string id)
-	{
-		Debug.WriteLine("Capture: " + DateTime.Now.ToString());
-		UpdateCurrentId(id);
+public async Task CaptureAndUploadScreenshot(string id)
+{
+    Debug.WriteLine("Capture: " + DateTime.Now.ToString());
+    UpdateCurrentId(id);
 
-		var screenshot = await CaptureScreenRegion(InputRect);
+    NSApplication.SharedApplication.InvokeOnMainThread(async () =>
+    {
+        var screenshot = await CaptureScreenRegion(InputRect);
 
+        if (screenshot is not null)
+        {
+            var bitmapRep = new NSBitmapImageRep(screenshot);
 
-		if (screenshot is not null)
-		{
-			var bitmapRep = new NSBitmapImageRep(screenshot);
+            var jpegData = bitmapRep.RepresentationUsingTypeProperties(NSBitmapImageFileType.Jpeg, new NSDictionary());
+            var byteArray = new byte[jpegData.Length];
+            Marshal.Copy(jpegData.Bytes, byteArray, 0, (int)jpegData.Length);
 
-			var jpegData = bitmapRep.RepresentationUsingTypeProperties(NSBitmapImageFileType.Jpeg, new NSDictionary());
-			var byteArray = new byte[jpegData.Length];
-			Marshal.Copy(jpegData.Bytes, byteArray, 0, (int)jpegData.Length);
-
-			// var desktopPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "screenshot.jpg");
-			// File.WriteAllBytes(desktopPath, byteArray);
-
-			var content = new MultipartFormDataContent();
-			content.Add(new ByteArrayContent(byteArray), "Image", "screenshot.jpg");
-			content.Add(new StringContent(_currentId), "Id");
-			var response = await _client.PostAsync($"{Constants.BaseUrl}/image", content);
-		}
-	}
+            var content = new MultipartFormDataContent();
+            content.Add(new ByteArrayContent(byteArray), "Image", "screenshot.jpg");
+            content.Add(new StringContent(_currentId), "Id");
+            var response = await _client.PostAsync($"{Constants.BaseUrl}/image", content);
+        }
+    });
+}
 
 
 	async Task<CGImage?> CaptureScreenRegion(CGRect screenRect)
@@ -106,8 +105,8 @@ public class ScreenshotTimerService : IDisposable
 				if (processId == processIdNumber.Int32Value)
 				{
 					var availableContent = Interop.CGWindowListCreateImage(screenRect,
-						CGWindowListOption.OnScreenBelowWindow,
-						windowNumber, CGWindowImageOption.BestResolution);
+						CGWindowListOption.All,
+						windowNumber, CGWindowImageOption.Default);
 					if (availableContent != IntPtr.Zero)
 					{
 						var img = Runtime.GetINativeObject<CGImage>(availableContent, false);

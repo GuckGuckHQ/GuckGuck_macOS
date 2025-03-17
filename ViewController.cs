@@ -15,7 +15,7 @@ public partial class ViewController : NSViewController
 	bool _isCapturing = false;
 	ScreenshotTimerService _screenshotService;
     string[] _units = { "Seconds", "Minutes", "Hours" };
-    int _currentUnitIndex = 0;
+    int _currentUnitIndex = 1;
 
 	public ViewController() : base(nameof(ViewController), null)
 	{
@@ -26,6 +26,15 @@ public partial class ViewController : NSViewController
 		// This constructor is required if the view controller is loaded from a xib or a storyboard.
 		// Do not put any initialization here, use ViewDidLoad instead.
 	}
+
+	public override void ViewDidLayout()
+{
+    base.ViewDidLayout();
+    if (_screenshotService != null)
+    {
+        _screenshotService.InputRect = View.Window.ConvertRectToScreen(_firstRow.Frame);
+    }
+}
 
 	private async void StartButton_Activated(object sender, EventArgs e)
 	{
@@ -60,20 +69,56 @@ public partial class ViewController : NSViewController
         _currentUnitIndex = (_currentUnitIndex + 1) % _units.Length;
         _unitButton.Title = _units[_currentUnitIndex];
     }
+
     private void MinusButton_Activated(object sender, EventArgs e)
     {
-	    // Handle Minus button click
+        if (int.TryParse(_intervalTextBox.StringValue, out int value) && value > 1)
+        {
+            _intervalTextBox.StringValue = (value - 1).ToString();
+			switch (_currentUnitIndex)
+			{
+				case 0:
+					value *= 1000;
+					break;
+				case 1:
+					value *= 60 * 1000;
+					break;
+				case 2:
+					value *= 60 * 60 * 1000;
+					break;
+			}
+			_timerInterval = value;
+        }
     }
 
     private void PlusButton_Activated(object sender, EventArgs e)
     {
-	    // Handle Plus button click
+        if (int.TryParse(_intervalTextBox.StringValue, out int value))
+        {
+            _intervalTextBox.StringValue = (value + 1).ToString();
+			switch (_currentUnitIndex)
+			{
+				case 0:
+					value *= 1000;
+					break;
+				case 1:
+					value *= 60 * 1000;
+					break;
+				case 2:
+					value *= 60 * 60 * 1000;
+					break;
+			}
+			_timerInterval = value;
+        }
     }
     
 
     private void VisitButton_Activated(object sender, EventArgs e)
     {
-	    // Handle Small button click
+		if (Uri.TryCreate(_urlTextBox.StringValue, UriKind.Absolute, out Uri uri))
+		{
+			NSWorkspace.SharedWorkspace.OpenUrl(uri);
+		}
     }
     
 	public override NSObject RepresentedObject

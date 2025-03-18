@@ -8,8 +8,13 @@
 
     <!--
       Enable full trimming in Release mode.
-      To learn more, see: https://learn.microsoft.com/dotnet/core/deploying/trimming/trimming-options#trimming-granularity
+      To learn more, see:
+    https://learn.microsoft.com/dotnet/core/deploying/trimming/trimming-options#trimming-granularity
     -->
     <TrimMode Condition="'$(Configuration)' == 'Release'">full</TrimMode>
+
   </PropertyGroup>
+  <ItemGroup>
+    <BundleResource Include="overpass-mono-regular.otf" />
+  </ItemGroup>
 </Project>

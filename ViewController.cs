@@ -1,11 +1,4 @@
-using System.Runtime.InteropServices;
-using AppKit;
-using Foundation;
-using CoreGraphics;
-using ImageIO;
-using MobileCoreServices;
 using ObjCRuntime;
-using ScreenCaptureKit;
 
 namespace GuckGuck;
 
@@ -14,8 +7,8 @@ public partial class ViewController : NSViewController
 	double _timerInterval = 5 * 60 * 1000;
 	bool _isCapturing = false;
 	ScreenshotTimerService _screenshotService;
-    string[] _units = { "Seconds", "Minutes", "Hours" };
-    int _currentUnitIndex = 1;
+	string[] _units = { "Seconds", "Minutes", "Hours" };
+	int _currentUnitIndex = 1;
 
 	public ViewController() : base(nameof(ViewController), null)
 	{
@@ -27,15 +20,6 @@ public partial class ViewController : NSViewController
 		// Do not put any initialization here, use ViewDidLoad instead.
 	}
 
-	public override void ViewDidLayout()
-{
-    base.ViewDidLayout();
-    if (_screenshotService != null)
-    {
-        _screenshotService.InputRect = View.Window.ConvertRectToScreen(_firstRow.Frame);
-    }
-}
-
 	private async void StartButton_Activated(object sender, EventArgs e)
 	{
 		if (_isCapturing)
@@ -43,13 +27,13 @@ public partial class ViewController : NSViewController
 			_startButton.Title = "Start";
 			_screenshotService.Stop();
 			_screenshotService.Dispose();
-			_urlTextBox.StringValue = "";
+			_urlTextView.Value = "";
 		}
 		else
 		{
 			_startButton.Title = "Stop";
 			_screenshotService = new ScreenshotTimerService(_timerInterval);
-			_screenshotService.InputRect = View.Window.ConvertRectToScreen(_firstRow.Frame);
+			_screenshotService.SetInputRect(View.Window.ConvertRectToScreen(_firstRow.Frame));
 			_screenshotService.Start();
 
 			var guidPart = Guid.NewGuid().ToString("N");
@@ -58,23 +42,23 @@ public partial class ViewController : NSViewController
 
 			var currentId = $"{guidPart}{randomPart}{timestampPart}";
 			await _screenshotService.CaptureAndUploadScreenshot(currentId);
-			_urlTextBox.StringValue = $"{Constants.BaseUrl}/{currentId}";
+			_urlTextView.Value = $"{Constants.BaseUrl}/{currentId}";
 		}
 
 		_isCapturing = !_isCapturing;
 	}
 
-    private void UnitButton_Activated(object sender, EventArgs e)
-    {
-        _currentUnitIndex = (_currentUnitIndex + 1) % _units.Length;
-        _unitButton.Title = _units[_currentUnitIndex];
-    }
+	private void UnitButton_Activated(object sender, EventArgs e)
+	{
+		_currentUnitIndex = (_currentUnitIndex + 1) % _units.Length;
+		_unitButton.Title = _units[_currentUnitIndex];
+	}
 
-    private void MinusButton_Activated(object sender, EventArgs e)
-    {
-        if (int.TryParse(_intervalTextBox.StringValue, out int value) && value > 1)
-        {
-            _intervalTextBox.StringValue = (value - 1).ToString();
+	private void MinusButton_Activated(object sender, EventArgs e)
+	{
+		if (int.TryParse(_intervalTextBox.StringValue, out int value) && value > 1)
+		{
+			_intervalTextBox.StringValue = (value - 1).ToString();
 			switch (_currentUnitIndex)
 			{
 				case 0:
@@ -87,15 +71,16 @@ public partial class ViewController : NSViewController
 					value *= 60 * 60 * 1000;
 					break;
 			}
-			_timerInterval = value;
-        }
-    }
 
-    private void PlusButton_Activated(object sender, EventArgs e)
-    {
-        if (int.TryParse(_intervalTextBox.StringValue, out int value))
-        {
-            _intervalTextBox.StringValue = (value + 1).ToString();
+			_timerInterval = value;
+		}
+	}
+
+	private void PlusButton_Activated(object sender, EventArgs e)
+	{
+		if (int.TryParse(_intervalTextBox.StringValue, out int value))
+		{
+			_intervalTextBox.StringValue = (value + 1).ToString();
 			switch (_currentUnitIndex)
 			{
 				case 0:
@@ -108,19 +93,20 @@ public partial class ViewController : NSViewController
 					value *= 60 * 60 * 1000;
 					break;
 			}
-			_timerInterval = value;
-        }
-    }
-    
 
-    private void VisitButton_Activated(object sender, EventArgs e)
-    {
-		if (Uri.TryCreate(_urlTextBox.StringValue, UriKind.Absolute, out Uri uri))
+			_timerInterval = value;
+		}
+	}
+
+
+	private void VisitButton_Activated(object sender, EventArgs e)
+	{
+		if (Uri.TryCreate(_urlTextView.Value, UriKind.Absolute, out Uri uri))
 		{
 			NSWorkspace.SharedWorkspace.OpenUrl(uri);
 		}
-    }
-    
+	}
+
 	public override NSObject RepresentedObject
 	{
 		get => base.RepresentedObject;

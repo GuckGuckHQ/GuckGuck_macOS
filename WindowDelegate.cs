@@ -1,6 +1,3 @@
-using AppKit;
-using Foundation;
-
 namespace GuckGuck
 {
     public class WindowDelegate : NSWindowDelegate

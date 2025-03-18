@@ -1,13 +1,6 @@
 using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
 using System.Timers;
 using System.Runtime.InteropServices;
-using AppKit;
-using Foundation;
-using CoreGraphics;
-using ImageIO;
-using MobileCoreServices;
 using ObjCRuntime;
 using ScreenCaptureKit;
 using Timer = System.Timers.Timer;
@@ -19,7 +12,7 @@ public class ScreenshotTimerService : IDisposable
 	private readonly Timer _timer;
 	private readonly HttpClient _client;
 	private string _currentId;
-	public CGRect InputRect { get; set; }
+	CGRect _inputRect { get; set; }
 
 
 	public ScreenshotTimerService(double interval)
@@ -55,6 +48,13 @@ public class ScreenshotTimerService : IDisposable
 		await CaptureAndUploadScreenshot(_currentId);
 	}
 
+	public void SetInputRect(CGRect rect)
+	{
+		//macOS coordinates are flipped
+		_inputRect = new CGRect(rect.X, NSScreen.MainScreen.Frame.Height - rect.Y - rect.Height, rect.Width, rect.Height);
+	}
+
+
 public async Task CaptureAndUploadScreenshot(string id)
 {
     Debug.WriteLine("Capture: " + DateTime.Now.ToString());
@@ -62,8 +62,7 @@ public async Task CaptureAndUploadScreenshot(string id)
 
     NSApplication.SharedApplication.InvokeOnMainThread(async () =>
     {
-        var screenshot = await CaptureScreenRegion(InputRect);
-
+        var screenshot = await CaptureScreenRegion(_inputRect);
         if (screenshot is not null)
         {
             var bitmapRep = new NSBitmapImageRep(screenshot);

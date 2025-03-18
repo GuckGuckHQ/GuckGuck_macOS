@@ -16,5 +16,6 @@
   </PropertyGroup>
   <ItemGroup>
     <BundleResource Include="overpass-mono-regular.otf" />
+    <BundleResource Include="Icons/**" />
   </ItemGroup>
 </Project>

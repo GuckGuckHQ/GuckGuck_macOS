@@ -47,28 +47,28 @@ public partial class ViewController : NSViewController
 	{
 		base.ViewDidLoad();
 
-    // Load the custom font
-    var fontPath = NSBundle.MainBundle.PathForResource("overpass-mono-regular", "otf");
-    var fontData = NSData.FromFile(fontPath);
-    var provider = new CGDataProvider(fontData);
-    var cgFont = CGFont.CreateFromProvider(provider);
+		// Load the custom font
+		var fontPath = NSBundle.MainBundle.PathForResource("overpass-mono-regular", "otf");
+		var fontData = NSData.FromFile(fontPath);
+		var provider = new CGDataProvider(fontData);
+		var cgFont = CGFont.CreateFromProvider(provider);
 
-    if (cgFont != null)
-    {
-        CTFontManager.RegisterGraphicsFont(cgFont, out var error);
-        if (error != null)
-        {
-            Debug.WriteLine($"Error registering font: {error.LocalizedDescription}");
-        }
-    }
+		if (cgFont != null)
+		{
+			CTFontManager.RegisterGraphicsFont(cgFont, out var error);
+			if (error != null)
+			{
+				Debug.WriteLine($"Error registering font: {error.LocalizedDescription}");
+			}
+		}
 
-    // Create an NSFont instance with the custom font
-    var customFont = NSFont.FromFontName("Overpass Mono", 14); // Adjust size as needed
-    if (customFont == null)
-    {
-        Debug.WriteLine("Failed to load custom font.");
-    }
-        
+		// Create an NSFont instance with the custom font
+		var customFont = NSFont.FromFontName("Overpass Mono", 14); // Adjust size as needed
+		if (customFont == null)
+		{
+			Debug.WriteLine("Failed to load custom font.");
+		}
+
 
 		_firstRow = new NSView
 		{
@@ -89,20 +89,25 @@ public partial class ViewController : NSViewController
 		{
 			Title = "Start",
 			TranslatesAutoresizingMaskIntoConstraints = false,
-			Font = customFont
+			Font = customFont,
+			Image = new NSImage(NSBundle.MainBundle.PathForResource("Icons/camera-3-line", "svg")),
+			ImagePosition = NSCellImagePosition.ImageRight,
 		};
 
 		_minusButton = new NSButton
 		{
-			Title = "-",
+			Title = string.Empty,
 			TranslatesAutoresizingMaskIntoConstraints = false,
-			Font = customFont,
+			Image = new NSImage(NSBundle.MainBundle.PathForResource("Icons/subtract-line", "svg")),
+			ImagePosition = NSCellImagePosition.ImageOnly,
 		};
 
 		_plusButton = new NSButton
 		{
-			Title = "+",
+			Title = string.Empty,
 			TranslatesAutoresizingMaskIntoConstraints = false, Font = customFont,
+			Image = new NSImage(NSBundle.MainBundle.PathForResource("Icons/add-line", "svg")),
+			ImagePosition = NSCellImagePosition.ImageOnly,
 		};
 
 		_intervalTextBox = new NSTextField
@@ -115,6 +120,8 @@ public partial class ViewController : NSViewController
 		{
 			Title = "Minutes",
 			TranslatesAutoresizingMaskIntoConstraints = false, Font = customFont,
+            			Image = new NSImage(NSBundle.MainBundle.PathForResource("Icons/time-line", "svg")),
+			ImagePosition = NSCellImagePosition.ImageRight,
 		};
 
 		_urlTextView = new NSTextView
@@ -125,18 +132,18 @@ public partial class ViewController : NSViewController
 			HorizontallyResizable = true,
 			VerticallyResizable = false,
 			Editable = false,
-            Font = NSFont.FromFontName("Overpass Mono", 11), // Set font size to 11
+			Font = NSFont.FromFontName("Overpass Mono", 11),
 		};
 		_urlTextView.TextContainer.WidthTracksTextView = false;
 
 		_visitButton = new NSButton
 		{
-			Title = "Visit",
+			Title = string.Empty,
 			TranslatesAutoresizingMaskIntoConstraints = false,
-			Font = customFont,
+			Image = new NSImage(NSBundle.MainBundle.PathForResource("Icons/share-box-line", "svg")),
+			ImagePosition = NSCellImagePosition.ImageOnly,
 		};
 
-		// Create a stack view for the minus, textbox, plus, and minutes button
 		var stackView = new NSStackView
 		{
 			Orientation = NSUserInterfaceLayoutOrientation.Horizontal,
@@ -174,7 +181,7 @@ public partial class ViewController : NSViewController
 			secondRow.LeftAnchor.ConstraintEqualTo(View.LeftAnchor),
 			secondRow.RightAnchor.ConstraintEqualTo(View.RightAnchor),
 			secondRow.BottomAnchor.ConstraintEqualTo(View.BottomAnchor),
-			secondRow.HeightAnchor.ConstraintEqualTo(60)
+			secondRow.HeightAnchor.ConstraintEqualTo(70)
 		});
 
 		// Set up constraints for the buttons and textbox in the second row
@@ -186,7 +193,7 @@ public partial class ViewController : NSViewController
 
 			stackView.RightAnchor.ConstraintEqualTo(secondRow.RightAnchor, -_spacing),
 			stackView.CenterYAnchor.ConstraintEqualTo(secondRow.CenterYAnchor, -_padding),
-			stackView.WidthAnchor.ConstraintLessThanOrEqualTo(200), // Set maximum width for stackView
+			stackView.WidthAnchor.ConstraintLessThanOrEqualTo(260),
 
 			_urlTextView.LeftAnchor.ConstraintEqualTo(secondRow.LeftAnchor, _spacing),
 			_urlTextView.TopAnchor.ConstraintEqualTo(_startButton.BottomAnchor, _spacing),
@@ -201,11 +208,30 @@ public partial class ViewController : NSViewController
 		_startButtonMinWidthConstraint.Priority = 999; // Set a high priority but lower than required constraints
 		_startButtonMinWidthConstraint.Active = true;
 
-		var _unitButtonWidthConstraint = _unitButton.WidthAnchor.ConstraintEqualTo(100);
+		var _unitButtonWidthConstraint = _unitButton.WidthAnchor.ConstraintEqualTo(120);
 		_unitButtonWidthConstraint.Active = true;
 
 		var _intervalTextBoxWidthConstraint = _intervalTextBox.WidthAnchor.ConstraintEqualTo(32);
 		_intervalTextBoxWidthConstraint.Active = true;
+
+		var _minusButtonWidthConstraint = _minusButton.WidthAnchor.ConstraintEqualTo(42);
+		_minusButtonWidthConstraint.Active = true;
+
+		var _plusButtonWidthConstraint = _plusButton.WidthAnchor.ConstraintEqualTo(42);
+		_plusButtonWidthConstraint.Active = true;
+		
+		var _visitButtonHeightConstraint = _intervalTextBox.HeightAnchor.ConstraintEqualTo(32);
+		_visitButtonHeightConstraint.Active = true;
+
+        var _sharedHeightConstraint = _startButton.HeightAnchor.ConstraintEqualTo(28); // Assuming 32 is the desired height
+_sharedHeightConstraint.Active = true;
+_minusButton.HeightAnchor.ConstraintEqualTo(_startButton.HeightAnchor).Active = true;
+_plusButton.HeightAnchor.ConstraintEqualTo(_startButton.HeightAnchor).Active = true;
+_intervalTextBox.HeightAnchor.ConstraintEqualTo(_startButton.HeightAnchor).Active = true;
+_unitButton.HeightAnchor.ConstraintEqualTo(_startButton.HeightAnchor).Active = true;
+_visitButton.HeightAnchor.ConstraintEqualTo(_startButton.HeightAnchor).Active = true;
+_unitButton.HeightAnchor.ConstraintEqualTo(_startButton.HeightAnchor).Active = true;
+
 
 		_startButton.Activated += StartButton_Activated;
 		_minusButton.Activated += MinusButton_Activated;
